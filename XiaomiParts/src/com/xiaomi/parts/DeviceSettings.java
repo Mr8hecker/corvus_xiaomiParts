@@ -48,6 +48,7 @@ import com.xiaomi.parts.SuTask;
 import com.xiaomi.parts.Fastcharge;
 
 import com.xiaomi.parts.ModeSwitch.SmartChargingSwitch;
+import com.xiaomi.parts.ModeSwitch.OTGModeSwitch;
 
 public class DeviceSettings extends PreferenceFragment implements
         Preference.OnPreferenceChangeListener {
@@ -72,7 +73,7 @@ public class DeviceSettings extends PreferenceFragment implements
     public static final String PREF_USB_FASTCHARGE = "fastcharge";
     public static final String USB_FASTCHARGE_PATH = "/sys/kernel/fast_charge/force_fast_charge";
     public static final String PREF_KEY_FPS_INFO = "fps_info";
-
+    public static final String KEY_OTG_SWITCH = "otg";
     public static final String PERF_MSM_THERMAL = "msmthermal";
     public static final String MSM_THERMAL_PATH = "/sys/module/msm_thermal/parameters/enabled";
     public static final String PERF_CORE_CONTROL = "corecontrol";
@@ -91,7 +92,7 @@ public class DeviceSettings extends PreferenceFragment implements
     private static final String SELINUX_CATEGORY = "selinux";
     private static final String PREF_SELINUX_MODE = "selinux_mode";
     private static final String PREF_SELINUX_PERSISTENCE = "selinux_persistence";
-
+    private static TwoStatePreference mOTGModeSwitch;
     private static final String PREF_CLEAR_SPEAKER = "clear_speaker_settings";
 
     private CustomSeekBarPreference mWhiteTorchBrightness;
@@ -245,6 +246,11 @@ public class DeviceSettings extends PreferenceFragment implements
 
         mSeekBarPreference = (SeekBarPreference) findPreference("seek_bar");
         mSeekBarPreference.setEnabled(mSmartChargingSwitch.isChecked());
+
+        mOTGModeSwitch = (TwoStatePreference) findPreference(KEY_OTG_SWITCH);
+        mOTGModeSwitch.setEnabled(OTGModeSwitch.isSupported());
+        mOTGModeSwitch.setChecked(OTGModeSwitch.isCurrentlyEnabled(this.getContext()));
+        mOTGModeSwitch.setOnPreferenceChangeListener(new OTGModeSwitch());
     }
 
     @Override

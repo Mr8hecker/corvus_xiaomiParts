@@ -171,5 +171,16 @@
             android:name=".thermal.ThermalService" 
             android:permission="ThermalService">
         </service>
+
+        <service
+            android:name="com.xiaomi.parts.OtgToggleService"
+            android:icon="@drawable/ic_otg_tile"
+            android:label="@string/tile_otg_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action
+                    android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
     </application>
 </manifest>

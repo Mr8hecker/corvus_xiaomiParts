@@ -167,6 +167,11 @@
             android:summary="@string/tcpcongestion_summary"
             android:icon="@drawable/ic_tcp" 
             android:title="@string/tcpcongestion_title" />
+
+        <SwitchPreference
+            android:key="otg"
+            android:summary="@string/otg_mode_summary"
+            android:title="@string/otg_mode_title" />
     </PreferenceCategory>
 
     <PreferenceCategory

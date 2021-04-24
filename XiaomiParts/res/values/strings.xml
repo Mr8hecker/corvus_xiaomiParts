@@ -246,4 +246,9 @@
     <string name="smart_charging_summary">Helps in cooling down &amp; also protects from over charging the device</string>
     <string name="reset_stats_title">Reset battery stats</string>
     <string name="reset_stats_summary">Battery stats will get reset when charging limit is reached</string>
+
+    <!-- otg mode -->
+    <string name="otg_mode_summary">Enable USB-OTG power supply for external headphones and flash drives</string>
+    <string name="otg_mode_title">Enable USB-OTG</string>
+    <string name="tile_otg_mode">Enable USB-OTG</string>
 </resources>
