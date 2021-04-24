@@ -18,6 +18,7 @@ package com.xiaomi.parts.preferences;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -26,10 +27,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
 
 import androidx.core.content.res.TypedArrayUtils;
+import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.RestrictedPreference;
@@ -46,10 +49,10 @@ public class SeekBarPreference extends RestrictedPreference
     private int mMax;
     private int mMin;
     private boolean mTrackingTouch;
-
     private boolean mContinuousUpdates;
     private int mDefaultProgress = -1;
 
+    private TextView mSelected_Value;
     private SeekBar mSeekBar;
     private boolean mShouldBlink;
     private CharSequence mSeekBarContentDescription;
@@ -103,6 +106,10 @@ public class SeekBarPreference extends RestrictedPreference
         mSeekBar.setMin(mMin);
         mSeekBar.setProgress(mProgress);
         mSeekBar.setEnabled(isEnabled());
+
+        mSelected_Value = (TextView) view.findViewById(R.id.selected_value);
+        mSelected_Value.setText(String.valueOf(getProgress()) + "%");
+
         final CharSequence title = getTitle();
         if (!TextUtils.isEmpty(mSeekBarContentDescription)) {
             mSeekBar.setContentDescription(mSeekBarContentDescription);
@@ -255,8 +262,11 @@ public class SeekBarPreference extends RestrictedPreference
         mTrackingTouch = false;
         if (seekBar.getProgress() != mProgress) {
             syncProgress(seekBar);
+            mSelected_Value.setText(String.valueOf(mProgress + "%"));
+            SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+            sharedPrefs.edit().putInt("seek_bar", mProgress).commit();
             Log.d("DeviceSettings", "Charging limit set at " + Integer.toString(mProgress));
-            Toast.makeText(getContext(), "Charging stops at " + mProgress + "%" , Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), "Charging stops at " + mProgress + "%" , Toast.LENGTH_SHORT).show();
         }
     }
 

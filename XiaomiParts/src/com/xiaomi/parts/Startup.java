@@ -30,15 +30,39 @@ public class Startup extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
     private static final String ONE_TIME_TUNABLE_RESTORE = "hardware_tunable_restored";
 
+    private void restore(String file, boolean enabled) {
+        if (file == null) {
+            return;
+        }
+        if (enabled) {
+            Utils.writeValue(file, "1");
+        }
+    }
+
+    private void restore(String file, String value) {
+        if (file == null) {
+            return;
+        }
+        Utils.writeValue(file, value);
+    }
+
     @Override
     public void onReceive(final Context context, final Intent bootintent) {
         boolean enabled = false;
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_SRGB_SWITCH, false);
+        restore(SRGBModeSwitch.getFile(), enabled);
+        enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_GAME_SWITCH, false);
+        restore(GameModeSwitch.getFile(), enabled);
         enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_OTG_SWITCH, false);
         restore(OTGModeSwitch.getFile(), enabled);
         enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_CHARGING_SWITCH, false);
         if (enabled) {
             context.startService(new Intent(context, SmartChargingService.class));
+        }
+        enabled = sharedPrefs.getBoolean(DeviceSettings.KEY_FPS_INFO, false);
+        if (enabled) {
+            context.startService(new Intent(context, FPSInfoService.class));
         }
     }
 

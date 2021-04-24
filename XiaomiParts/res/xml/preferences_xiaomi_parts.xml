@@ -89,6 +89,7 @@
             android:summary="@string/smart_charging_summary"
             android:title="@string/smart_charging_title" />
 
+
         <com.xiaomi.parts.preferences.SeekBarPreference
             android:key="seek_bar"
             android:title="Select charging limit"
@@ -98,6 +99,16 @@
             android:min="80"
             android:layout_gravity="center_vertical"
             android:layout_width="match_parent"/>
+
+        <com.xiaomi.parts.preferences.SecureSettingListPreference
+            android:key="charging_speed"
+            android:icon="@drawable/ic_charging_speed"
+            android:title="Charging Speed"
+            android:dialogTitle="Select Charging Speed"
+            android:entries="@array/charging_speed_entries"
+            android:entryValues="@array/charging_speed_values"
+            android:defaultValue="0"
+            android:summary="%s" />
 
         <SwitchPreference
             android:key="reset_stats"
@@ -169,9 +180,28 @@
             android:title="@string/tcpcongestion_title" />
 
         <SwitchPreference
+            android:icon="@drawable/srgb_mode_icon"
             android:key="otg"
             android:summary="@string/otg_mode_summary"
             android:title="@string/otg_mode_title" />
+
+        <SwitchPreference
+            android:icon="@drawable/game_mode_icon"
+            android:key="game"
+            android:summary="@string/game_mode_summary"
+            android:title="@string/game_mode_title" />
+
+        <SwitchPreference
+            android:icon="@drawable/srgb_mode_icon"
+            android:key="srgb"
+            android:summary="@string/srgb_mode_summary"
+            android:title="@string/srgb_mode_title" />
+
+        <SwitchPreference
+            android:key="dnd"
+            android:icon="@drawable/ic_info_outline_24dp"
+            android:title="@string/dnd_title"
+            android:summary="@string/dnd_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory

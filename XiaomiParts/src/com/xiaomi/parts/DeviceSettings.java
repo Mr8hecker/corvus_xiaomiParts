@@ -16,6 +16,18 @@
 
 package com.xiaomi.parts;
 
+import android.provider.Settings;
+import android.text.TextUtils;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+import android.content.res.Resources;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.Context;
@@ -64,6 +76,9 @@ public class DeviceSettings extends PreferenceFragment implements
     public static final String CATEGORY_DISPLAY = "display";
     public static final String PREF_DEVICE_KCAL = "device_kcal";
 
+    public static final String TP_LIMIT_ENABLE = "/proc/touchpanel/oppo_tp_limit_enable";
+    public static final String TP_DIRECTION = "/proc/touchpanel/oppo_tp_direction";
+
     public static final String PREF_HEADPHONE_GAIN = "headphone_gain";
     public static final String HEADPHONE_GAIN_PATH = "/sys/kernel/sound_control/headphone_gain";
     public static final String PREF_MICROPHONE_GAIN = "microphone_gain";
@@ -74,6 +89,7 @@ public class DeviceSettings extends PreferenceFragment implements
     public static final String USB_FASTCHARGE_PATH = "/sys/kernel/fast_charge/force_fast_charge";
     public static final String PREF_KEY_FPS_INFO = "fps_info";
     public static final String KEY_OTG_SWITCH = "otg";
+    public static final String KEY_GAME_SWITCH = "game";
     public static final String PERF_MSM_THERMAL = "msmthermal";
     public static final String MSM_THERMAL_PATH = "/sys/module/msm_thermal/parameters/enabled";
     public static final String PERF_CORE_CONTROL = "corecontrol";
@@ -86,6 +102,7 @@ public class DeviceSettings extends PreferenceFragment implements
     public static final String LKM_SYSTEM_PROPERTY = "persist.lkm.profile";
     public static final String PREF_TCP = "tcpcongestion";
     public static final String TCP_SYSTEM_PROPERTY = "persist.tcp.profile";
+    public static final String KEY_SRGB_SWITCH = "srgb";
 
     private CustomSeekBarPreference mTorchBrightness;
 
@@ -93,6 +110,9 @@ public class DeviceSettings extends PreferenceFragment implements
     private static final String PREF_SELINUX_MODE = "selinux_mode";
     private static final String PREF_SELINUX_PERSISTENCE = "selinux_persistence";
     private static TwoStatePreference mOTGModeSwitch;
+    public static TwoStatePreference mDNDSwitch;
+    private static TwoStatePreference mGameModeSwitch;
+    private static TwoStatePreference mSRGBModeSwitch;
     private static final String PREF_CLEAR_SPEAKER = "clear_speaker_settings";
 
     private CustomSeekBarPreference mWhiteTorchBrightness;
@@ -103,8 +123,10 @@ public class DeviceSettings extends PreferenceFragment implements
     private SecureSettingListPreference mLKM;
     private SecureSettingListPreference mTCP;
     private VibratorStrengthPreference mVibratorStrength;
+    public static final String KEY_CHARGING_SPEED = "charging_speed";
     public static final String KEY_CHARGING_SWITCH = "smart_charging";
     public static final String KEY_RESET_STATS = "reset_stats";
+    public static final String KEY_DND_SWITCH = "dnd";
 
     private Preference mKcal;
     private Preference mAmbientPref;
@@ -112,10 +134,11 @@ public class DeviceSettings extends PreferenceFragment implements
     private CustomSeekBarPreference mMicrophoneGain;
     private CustomSeekBarPreference mEarpieceGain;
 
+    public static SecureSettingListPreference mChargingSpeed;
     private static TwoStatePreference mSmartChargingSwitch;
     public static TwoStatePreference mResetStats;
     public static SeekBarPreference mSeekBarPreference;
-
+    private static NotificationManager mNotificationManager;
     private static Context mContext;
     private SwitchPreference mSelinuxMode;
     private SwitchPreference mSelinuxPersistence;
@@ -239,6 +262,10 @@ public class DeviceSettings extends PreferenceFragment implements
         mSmartChargingSwitch.setChecked(prefs.getBoolean(KEY_CHARGING_SWITCH, false));
         mSmartChargingSwitch.setOnPreferenceChangeListener(new SmartChargingSwitch(getContext()));
 
+        mChargingSpeed = (SecureSettingListPreference) findPreference(KEY_CHARGING_SPEED);
+        mChargingSpeed.setEnabled(mSmartChargingSwitch.isChecked());
+        mChargingSpeed.setOnPreferenceChangeListener(this);
+
         mResetStats = (TwoStatePreference) findPreference(KEY_RESET_STATS);
         mResetStats.setChecked(prefs.getBoolean(KEY_RESET_STATS, false));
         mResetStats.setEnabled(mSmartChargingSwitch.isChecked());
@@ -251,6 +278,20 @@ public class DeviceSettings extends PreferenceFragment implements
         mOTGModeSwitch.setEnabled(OTGModeSwitch.isSupported());
         mOTGModeSwitch.setChecked(OTGModeSwitch.isCurrentlyEnabled(this.getContext()));
         mOTGModeSwitch.setOnPreferenceChangeListener(new OTGModeSwitch());
+
+        mGameModeSwitch = (TwoStatePreference) findPreference(KEY_GAME_SWITCH);
+        mGameModeSwitch.setEnabled(GameModeSwitch.isSupported());
+        mGameModeSwitch.setChecked(GameModeSwitch.isCurrentlyEnabled(this.getContext()));
+        mGameModeSwitch.setOnPreferenceChangeListener(new GameModeSwitch(getContext()));
+
+        mDNDSwitch = (TwoStatePreference) findPreference(KEY_DND_SWITCH);
+        mDNDSwitch.setChecked(prefs.getBoolean(KEY_DND_SWITCH, false));
+        mDNDSwitch.setOnPreferenceChangeListener(this);
+
+        mSRGBModeSwitch = (TwoStatePreference) findPreference(KEY_SRGB_SWITCH);
+        mSRGBModeSwitch.setEnabled(SRGBModeSwitch.isSupported());
+        mSRGBModeSwitch.setChecked(SRGBModeSwitch.isCurrentlyEnabled(this.getContext()));
+        mSRGBModeSwitch.setOnPreferenceChangeListener(new SRGBModeSwitch());
     }
 
     @Override
@@ -327,6 +368,10 @@ public class DeviceSettings extends PreferenceFragment implements
                 } else {
                     this.getContext().stopService(fpsinfo);
                 }
+                if (preference == mChargingSpeed) {
+            mChargingSpeed.setValue((String) Value);
+            mChargingSpeed.setSummary(mChargingSpeed.getEntry());
+        }
                 break;
             default:
                 break;

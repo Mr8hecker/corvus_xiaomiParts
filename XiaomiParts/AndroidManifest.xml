@@ -28,6 +28,9 @@
     <protected-broadcast android:name="com.android.systemui.doze.pulse" />
     <protected-broadcast android:name="com.xiaomi.parts.CUST_UPDATE" />
 
+    <!-- Required to enable dnd during game mode -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
     <application
         android:label="@string/advanced_settings"
         android:supportsRtl="true"
@@ -176,6 +179,33 @@
             android:name="com.xiaomi.parts.OtgToggleService"
             android:icon="@drawable/ic_otg_tile"
             android:label="@string/tile_otg_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action
+                    android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+
+        <receiver android:name="com.xiaomi.parts.Startup" >
+            <intent-filter android:priority="100" >
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.xiaomi.parts.GameModeTileService"
+            android:icon="@drawable/ic_game_tile"
+            android:label="@string/tile_game_mode"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action
+                    android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+
+       <service
+            android:name="com.xiaomi.parts.SRGBModeTileService"
+            android:icon="@drawable/ic_srgb_tile"
+            android:label="@string/tile_srgb_mode"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action
